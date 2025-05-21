@@ -1,72 +1,29 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zufälliges Meme</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #222;
-      color: #fff;
-      padding: 20px;
-    }
-    img {
-      max-width: 90%;
-      height: auto;
-      border-radius: 10px;
-      margin-top: 20px;
-      box-shadow: 0 0 20px #000;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #00bfff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    button:hover {
-      background-color: #009acd;
-    }
-  </style>
-</head>
-<body>
-  <h1>Zufälliges Meme</h1>
-  <img id="memeImage" src="" alt="Meme wird geladen...">
-  <br>
-  <button onclick="loadMeme()">Neues Meme anzeigen</button>
-
-  <script>
-    const subreddits = ['memes', 'de_memes', 'ich_iel', 'funny', 'me_irl'];
-    const shownMemes = new Set();
-
     async function loadMeme() {
       let tries = 0;
       let data;
 
       while (tries < 10) {
-        const subreddit = subreddits[Math.floor(Math.random() * subreddits.length)];
-        const response = await fetch(`https://meme-api.com/gimme/${subreddit}`);
-        data = await response.json();
+        try {
+          const subreddit = subreddits[Math.floor(Math.random() * subreddits.length)];
+          const response = await fetch(`https://meme-api.com/gimme/${subreddit}`);
+          
+          // Check ob Antwort ok ist
+          if (!response.ok) throw new Error("API antwortet nicht richtig");
 
-        if (!shownMemes.has(data.url)) {
-          shownMemes.add(data.url);
-          document.getElementById('memeImage').src = data.url;
-          return;
+          data = await response.json();
+
+          if (!shownMemes.has(data.url)) {
+            shownMemes.add(data.url);
+            document.getElementById('memeImage').src = data.url;
+            return;
+          }
+
+        } catch (err) {
+          console.error("Fehler beim Laden des Memes:", err);
         }
 
         tries++;
       }
 
-      alert("Keine neuen Memes gefunden. Bitte versuche es später nochmal.");
+      alert("Keine neuen Memes gefunden oder API-Probleme.");
     }
-
-    // Lade ein Meme beim ersten Laden der Seite
-    loadMeme();
-  </script>
-</body>
-</html>
